@@ -1,0 +1,50 @@
+version: '3'
+
+services:
+  app:
+    build: .
+    restart: always
+    container_name: apiato-app
+    ports:
+      - "8083:8083"
+    volumes:
+      - ./:/var/www/app
+    networks:
+      - app-networks
+    environment:
+      XDEBUG_ENABLED: "true"
+  db:
+    image: mysql:8
+    restart: always
+    container_name: apiato-mysql
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: apiato_db
+      MYSQL_ROOT_PASSWORD: secret
+    networks:
+      - app-networks
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+  testdb:
+    image: mysql:8
+    tmpfs: /var/lib/mysql
+    restart: always
+    container_name: apiato-mysql-test
+    environment:
+      MYSQL_DATABASE: apiato_db
+      MYSQL_ROOT_PASSWORD: secret
+    networks:
+      - app-networks
+  cache:
+    image: redis:latest
+    restart: always
+    container_name: apiato-redis
+    ports:
+      - 6379:6379
+    networks:
+      - app-networks
+
+networks:
+  app-networks:
+    driver: bridge
